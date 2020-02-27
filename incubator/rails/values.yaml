@@ -1,0 +1,76 @@
+# Default values for rails.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: ruby
+  tag: latest
+  pullPolicy: IfNotPresent
+  imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+replicaCount: 1
+
+extraEnv:
+  - name: RAILS_ENV
+    value: production
+
+deploy:
+  args: ["puma"]
+
+# BYODB - Used when postgresql.enabled is false. These values will be placed
+# verbatim into config/database.yml
+externalDatabase:
+  adapter:
+  database:
+  host:
+  username:
+  password:
+  pool:
+  timeout:
+
+postgresql:
+  enabled: false
+
+# Optional database settings, only apply when using postgresql. If using the
+# externalDatabase place these configurations just as you would in database.yml
+# under externalDatabase
+config:
+  database_pool_size: 5
+  database_timeout: 5000
+  database_encoding: unicode
+
+migrations:
+  enabled: false
+  args: ['rake', 'db:migrate']
+  #max_runtime: 300
+  #resources: {}
+  #retries: 3
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths: []
+
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
