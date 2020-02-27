@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rails-configs
+data:
+  database.yml: |-
+    production:
+      {{- if .Values.postgresql.enabled }}
+      adapter: postgresql
+      database: {{ .Values.postgresql.postgresqlDatabase }}
+      pool: {{ .Values.config.database_pool_size }}
+      timeout: {{ .Values.config.database_timeout }}
+      host: {{ .Release.Name }}-postgresql
+      username: {{ .Values.postgresql.postgresqlUsername | default "postgres"  }}
+      {{- if .Values.postgresql.postgresqlPassword }}
+      password: {{ .Values.postgresql.postgresqlPassword }}
+      {{- else -}}
+      password: {{ randAlphaNum 10 }}
+      {{- end }}
+      encoding: {{ .Values.config.database_encoding }}
+      {{- else -}}
+      {{- with .Values.externalDatabase }}
+      {{- toYaml . | nindent 4 }}
+      {{- end }}
+      {{- end }}

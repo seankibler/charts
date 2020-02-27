@@ -1,0 +1,39 @@
+{{- if .Values.migrations.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "rails.fullname" . }}-migration
+  labels:
+{{ include "rails.labels" . | indent 4 }}
+spec:
+  activeDeadlineSeconds: {{ .Values.migrations.max_runtime | default(300) }}
+  backoffLimit: {{ .Values.migrations.retries | default(3) }}
+  completions: 1
+  template:
+    metadata:
+      name: 
+    spec:
+    {{- with .Values.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}-migrations
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.extraEnv }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          args:
+          {{- with .Values.migrations.args }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.migrations.resources | nindent 12 }}
+          volumeMounts:
+            - name: rails-configs
+              mountPath: /app/config/database.yml
+              subPath: database.yml
+{{- end }}
+
